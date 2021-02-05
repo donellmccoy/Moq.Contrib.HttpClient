@@ -23,7 +23,9 @@ namespace Moq.Contrib.HttpClient
         public static HttpClient CreateClient(this Mock<HttpMessageHandler> handler)
         {
             if (handler == null)
+            {
                 throw new ArgumentNullException(nameof(handler));
+            }
 
             return new HttpClient(handler.Object, false);
         }
@@ -42,7 +44,9 @@ namespace Moq.Contrib.HttpClient
         public static IHttpClientFactory CreateClientFactory(this Mock<HttpMessageHandler> handler)
         {
             if (handler == null)
+            {
                 throw new ArgumentNullException(nameof(handler));
+            }
 
             var mock = new Mock<IHttpClientFactory>();
 
@@ -61,7 +65,9 @@ namespace Moq.Contrib.HttpClient
         private static ISetup<HttpMessageHandler, TResult> Setup<TResult>(this Mock<HttpMessageHandler> handler, Expression<Func<IHttpMessageHandler, TResult>> expression)
         {
             if (handler == null)
+            {
                 throw new ArgumentNullException(nameof(handler));
+            }
 
             return handler.Protected().As<IHttpMessageHandler>().Setup(expression);
         }
@@ -88,7 +94,9 @@ namespace Moq.Contrib.HttpClient
         private static ISetupSequentialResult<TResult> SetupSequence<TResult>(this Mock<HttpMessageHandler> handler, Expression<Func<IHttpMessageHandler, TResult>> expression)
         {
             if (handler == null)
+            {
                 throw new ArgumentNullException(nameof(handler));
+            }
 
             return handler.Protected().As<IHttpMessageHandler>().SetupSequence(expression);
         }
@@ -116,22 +124,32 @@ namespace Moq.Contrib.HttpClient
         private static ISetup<HttpMessageHandler, Task<HttpResponseMessage>> Setup(this ISetupConditionResult<HttpMessageHandler> handler, Expression<Func<IHttpMessageHandler, Task<HttpResponseMessage>>> expression)
         {
             if (handler == null)
+            {
                 throw new ArgumentNullException(nameof(handler));
+            }
 
             if (expression == null)
+            {
                 throw new ArgumentNullException(nameof(expression));
+            }
 
             // Expression should be a method call
             if (!(expression.Body is MethodCallExpression methodCall))
+            {
                 throw new ArgumentException("Expression is not a method call.", nameof(expression));
+            }
 
             // The method should be called on the interface parameter
             if (!(methodCall.Object is ParameterExpression left && left.Type == typeof(IHttpMessageHandler)))
+            {
                 throw new ArgumentException("Object of method call is not the parameter.", nameof(expression));
+            }
 
             // The called method should be SendAsync
             if (methodCall.Method.Name != "SendAsync")
+            {
                 throw new ArgumentException("Expression is not a SendAsync() method call.", nameof(expression));
+            }
 
             // Use reflection to get the protected method
             MethodInfo targetMethod = typeof(HttpMessageHandler).GetMethod("SendAsync", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -163,7 +181,9 @@ namespace Moq.Contrib.HttpClient
         private static void Verify<TResult>(this Mock<HttpMessageHandler> handler, Expression<Func<IHttpMessageHandler, TResult>> expression, Times? times = null, string failMessage = null)
         {
             if (handler == null)
+            {
                 throw new ArgumentNullException(nameof(handler));
+            }
 
             handler.Protected().As<IHttpMessageHandler>().Verify(expression, times, failMessage);
         }

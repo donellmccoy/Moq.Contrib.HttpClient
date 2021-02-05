@@ -32,6 +32,7 @@ namespace Moq.Contrib.HttpClient
             }
 
             configure?.Invoke(response);
+
             return response;
         }
 
@@ -48,10 +49,12 @@ namespace Moq.Contrib.HttpClient
         {
             return setup.ReturnsAsync((HttpRequestMessage request, CancellationToken _) =>
             {
-                return CreateResponse(
+                return CreateResponse
+                (
                     request: request,
                     statusCode: statusCode,
-                    configure: configure);
+                    configure: configure
+                );
             });
         }
 

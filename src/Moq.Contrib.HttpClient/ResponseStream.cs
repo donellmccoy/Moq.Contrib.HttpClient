@@ -31,11 +31,11 @@ namespace Moq.Contrib.HttpClient
             lock (inner)
             {
                 // Switch to wrapper's position
-                long originalPosition = inner.Position;
+                var originalPosition = inner.Position;
                 inner.Position = position;
 
                 // Read normally
-                int ret = inner.Read(buffer, offset, count);
+                var ret = inner.Read(buffer, offset, count);
 
                 // Swap positions back
                 position = inner.Position;

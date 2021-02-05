@@ -75,8 +75,8 @@ namespace Moq.Contrib.HttpClient.Test
             }
 
             // Call the "service" which we expect to make the requests set up above
-            string enGreeting = await GetGreeting("en-US", "world");
-            string jaGreeting = await GetGreeting("ja-JP", "世界");
+            var enGreeting = await GetGreeting("en-US", "world");
+            var jaGreeting = await GetGreeting("ja-JP", "世界");
 
             enGreeting.Should().Be("Hello, world");
             jaGreeting.Should().Be("こんにちは、世界"); // Konnichiwa, sekai
@@ -103,8 +103,7 @@ namespace Moq.Contrib.HttpClient.Test
             var url = "https://example.com";
             var expected = $"This is {methodStr}!";
 
-            handler.SetupRequest(method, url)
-                .ReturnsResponse(expected);
+            handler.SetupRequest(method, url).ReturnsResponse(expected);
 
             var response = await client.SendAsync(new HttpRequestMessage(method, url));
             var actual = await response.Content.ReadAsStringAsync();
@@ -136,18 +135,16 @@ namespace Moq.Contrib.HttpClient.Test
             };
 
             // Set up a response for a request with this song
-            handler
-                .SetupRequest(HttpMethod.Post, url, async request =>
-                {
-                    // Here we can parse the request json
-                    var json = JObject.Parse(await request.Content.ReadAsStringAsync());
-                    return json.Value<string>("title") == model.Title;
-                })
-                .ReturnsResponse(HttpStatusCode.Created);
+            handler.SetupRequest(HttpMethod.Post, url, async request =>
+                    {
+                        // Here we can parse the request json
+                        var json = JObject.Parse(await request.Content.ReadAsStringAsync());
+                        return json.Value<string>("title") == model.Title;
+                    }).ReturnsResponse(HttpStatusCode.Created);
 
             // A request without a valid auth token should fail (the last setup takes precedence)
             handler.SetupRequest(r => r.Headers.Authorization?.Parameter != token)
-                .ReturnsResponse(HttpStatusCode.Unauthorized);
+                   .ReturnsResponse(HttpStatusCode.Unauthorized);
 
             // Imaginary service method
             async Task CreateSong(object song, string authToken)
@@ -194,22 +191,20 @@ namespace Moq.Contrib.HttpClient.Test
             var handler = new Mock<HttpMessageHandler>();
             var client = handler.CreateClient();
 
-            string baseUrl = "https://example.com:8080/api/v2";
+            var baseUrl = "https://example.com:8080/api/v2";
 
             // Flurl can make mocking endpoints easier (see https://flurl.io/docs/fluent-url/). Its methods return a
             // Url type which implicitly converts back to string. Note that this setup is still matching an exact url.
             handler.SetupRequest(baseUrl.AppendPathSegment("search").SetQueryParam("q", "fus ro dah"))
-                .ReturnsResponse(HttpStatusCode.OK);
+                   .ReturnsResponse(HttpStatusCode.OK);
 
             // When dealing with query params, it's often better to use a predicate as shown above since params may come
             // in different orders, and we may not need to match all of them either
             handler.SetupRequest(HttpMethod.Post, r =>
             {
                 Url url = r.RequestUri; // Implicit conversion from Uri to Url
-                return url.Path == baseUrl.AppendPathSegment("followers/enlist") &&
-                    url.QueryParams["name"].Equals("Lydia");
-            })
-                .ReturnsResponse(HttpStatusCode.OK);
+                return url.Path == baseUrl.AppendPathSegment("followers/enlist") && url.QueryParams["name"].Equals("Lydia");
+            }).ReturnsResponse(HttpStatusCode.OK);
 
             await client.GetAsync("https://example.com:8080/api/v2/search?q=fus%20ro%20dah");
 
@@ -228,14 +223,12 @@ namespace Moq.Contrib.HttpClient.Test
             var client = handler.CreateClient();
 
             // Mock two different endpoints
-            string fooUrl = "https://example.com/foo";
-            string barUrl = "https://example.com/bar";
+            var fooUrl = "https://example.com/foo";
+            var barUrl = "https://example.com/bar";
 
-            handler.SetupRequest(fooUrl)
-                .ReturnsAsync(new HttpResponseMessage());
+            handler.SetupRequest(fooUrl).ReturnsAsync(new HttpResponseMessage());
 
-            handler.SetupRequest(barUrl)
-                .ReturnsAsync(new HttpResponseMessage());
+            handler.SetupRequest(barUrl).ReturnsAsync(new HttpResponseMessage());
 
             // Make various calls
             await client.GetAsync(fooUrl);
@@ -265,8 +258,26 @@ namespace Moq.Contrib.HttpClient.Test
             verifyFooPostedOtherStuff.Should().Throw<MockException>("we sent the string \"stuff\", not \"other stuff\"");
 
             // The fail messages should be passed along as well
-            var messages = new[] { verifyMoreThanThreeRequests, verifyThreeFoos, verifyBarPosted, verifyFooPostedOtherStuff }
-                .Select(f => { try { f(); return null; } catch (MockException ex) { return ex.Message; } });
+            var messages = new[]
+                {
+                    verifyMoreThanThreeRequests, 
+                    verifyThreeFoos, 
+                    verifyBarPosted, 
+                    verifyFooPostedOtherStuff
+                }
+                .Select(f =>
+                {
+                    try
+                    {
+                        f();
+                        return null;
+                    }
+                    catch (MockException ex)
+                    {
+                        return ex.Message;
+                    }
+                });
+
             messages.Should().OnlyContain(x => x.Contains("oh noes"), "all verify exceptions should contain the failMessage");
         }
     }
