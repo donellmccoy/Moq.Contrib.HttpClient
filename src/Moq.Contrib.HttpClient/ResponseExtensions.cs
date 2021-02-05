@@ -69,9 +69,7 @@ namespace Moq.Contrib.HttpClient
             HttpStatusCode statusCode,
             Action<HttpResponseMessage> configure = null)
         {
-            return setup.ReturnsAsync(CreateResponse(
-                statusCode: statusCode,
-                configure: configure));
+            return setup.ReturnsAsync(CreateResponse(statusCode: statusCode, configure: configure));
         }
 
         /// <summary>
@@ -95,11 +93,13 @@ namespace Moq.Contrib.HttpClient
 
             return setup.ReturnsAsync((HttpRequestMessage request, CancellationToken _) =>
             {
-                return CreateResponse(
+                return CreateResponse
+                (
                     request: request,
                     statusCode: statusCode,
                     content: content,
-                    configure: configure);
+                    configure: configure
+                );
             });
         }
 
